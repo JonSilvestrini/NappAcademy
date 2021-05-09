@@ -38,7 +38,7 @@ class Estrategia_SQLite(Estrategia):
         db = dados['db']
         with closing(sqlite3.connect(db)) as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM vendas;")
+            cursor.execute("SELECT total, vendido_em FROM vendas;")
             for linha in cursor.fetchall():
                 lista_registros.append(linha)
         return lista_registros
@@ -57,7 +57,7 @@ class Estrategia_CSV(Estrategia):
         with open(arquivo, newline='\n') as csvfile:
             reader = csv.DictReader(csvfile)
             for line in reader:
-                lista_registros.append(line)
+                lista_registros.append((line["total"], line["vendido_em"]))
         return lista_registros
 
     def parametros_necessarios(self):
@@ -65,3 +65,45 @@ class Estrategia_CSV(Estrategia):
 
     def nome(self):
         return 'Algoritmo CSV'
+
+
+class Estrategia_Texto1(Estrategia):
+    def execute(self, dados):
+        lista_registros = []
+        arquivo = dados['arquivo']
+        with open(arquivo, newline='\n') as txt:
+            for line in txt:
+                line = line.replace("\n","")
+                if line.startswith("Arquivo") or line.startswith("*") or line.startswith("DATA"):
+                    continue
+
+                line = line.split("       ")
+                lista_registros.append((line[4].strip(), float(line[3].strip()), line[0].strip()))
+        return lista_registros
+
+    def parametros_necessarios(self):
+        return ('algoritmo', 'arquivo')
+
+    def nome(self):
+        return 'Algoritmo Texto 1'
+
+
+class Estrategia_Texto2(Estrategia):
+    def execute(self, dados):
+        lista_registros = []
+        arquivo = dados['arquivo']
+        with open(arquivo, newline='\n') as txt:
+            for line in txt:
+                line = line.replace("\n","")
+                if line.startswith("Arquivo") or line.startswith("*") or line.startswith("DATA"):
+                    continue
+
+                line = line.split("       ")
+                lista_registros.append((line[1].strip(), float(line[2].strip()), line[0].strip()))
+        return lista_registros
+
+    def parametros_necessarios(self):
+        return ('algoritmo', 'arquivo')
+
+    def nome(self):
+        return 'Algoritmo Texto 2'
